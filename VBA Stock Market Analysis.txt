@@ -1,0 +1,105 @@
+Sub Stock_Market_Analysis()
+    
+  'Set ws variable and Loop through WS
+    Dim ws As Worksheet
+    For Each ws In Worksheets
+
+       'Label Summary Table Columns
+        ws.Cells(1, 9).Value = "Ticker"
+        ws.Cells(1, 10).Value = "Yearly Change"
+        ws.Cells(1, 11).Value = "Percent Change"
+        ws.Cells(1, 12).Value = "Total Stock Volume"
+         
+        'Set other variables
+        Dim ticker_symbol As String
+        Dim total_vol As Double
+        Dim year_open As Double
+        Dim year_close As Double
+        Dim year_change As Double
+        Dim percent_change As Double
+        Dim summary_table As Long
+        Dim lastrow As Long
+        
+        
+        total_vol = 0
+        summary_table = 2
+        year_open = 0
+        year_close = 0
+        year_change = 0
+        percent_change = 0
+        lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        
+        
+
+        'Loop through ticker symbols
+        For i = 2 To lastrow
+            
+            'Conditional for year open price
+            If ws.Cells(i, 1).Value <> ws.Cells(i - 1, 1).Value Then
+
+                year_open = ws.Cells(i, 3).Value
+
+            End If
+
+            'Calculate total volume
+            total_vol = total_vol + ws.Cells(i, 7)
+
+            'Conditional for changing ticker symbol
+            If ws.Cells(i, 1).Value <> ws.Cells(i + 1, 1).Value Then
+
+                'Move to summary table
+                ws.Cells(summary_table, 9).Value = ws.Cells(i, 1).Value
+
+                'Move total volume to summary table
+                ws.Cells(summary_table, 12).Value = total_vol
+
+                'Identify year end price
+                year_close = ws.Cells(i, 6).Value
+
+                'Calculate yearly change
+                year_change = year_close - year_open
+                ws.Cells(summary_table, 10).Value = year_change
+
+                'Conditional to color yearly change cells
+                If year_change >= 0 Then
+                    ws.Cells(summary_table, 10).Interior.ColorIndex = 4
+                Else
+                    ws.Cells(summary_table, 10).Interior.ColorIndex = 3
+                End If
+                
+                
+                'Get percent change and percent number format
+                If year_open = 0 And year_close = 0 Then
+                    'Can't divide by zero
+                    percent_change = 0
+                    ws.Cells(summary_table, 11).Value = percent_change
+                    ws.Cells(summary_table, 11).NumberFormat = "0.00%"
+                ElseIf year_open = 0 Then
+                    'Set new variable for stocks starting at zero as percent change
+                    Dim percent_change_ns As String
+                    percent_change_ns = "new stock"
+                    ws.Cells(summary_table, 11).Value = percent_change
+                Else
+                    percent_change = year_change / year_open
+                    ws.Cells(summary_table, 11).Value = percent_change
+                    ws.Cells(summary_table, 11).NumberFormat = "0.00%"
+                End If
+                
+                'Add 1 to row
+                summary_table = summary_table + 1
+
+                total_vol = 0
+                year_open = 0
+                year_close = 0
+                year_change = 0
+                percent_change = 0
+                
+            End If
+        Next i
+
+        
+        
+        Next ws
+        
+        
+End Sub
